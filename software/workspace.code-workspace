@@ -39,6 +39,7 @@
 			"random": "cpp"
 		},
 		"autoHide.autoHidePanel": false,
-		"autoHide.autoHideSideBar": false
+		"autoHide.autoHideSideBar": false,
+		"idf.portWin": "COM13"
 	}
 }

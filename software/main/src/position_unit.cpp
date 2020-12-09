@@ -175,6 +175,6 @@ esp_err_t start_mpu(void)
     // Ready to start reading
     ESP_RETURN_ERROR(MPU.resetFIFO()); // start clean
 
-    xTaskCreatePinnedToCore(mpu_task, "mpu_task", 4096, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(mpu_task, "mpu_task", 8096, NULL, 5, NULL, 0);
     return ESP_OK;
 }
