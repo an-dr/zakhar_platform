@@ -65,7 +65,7 @@ extern "C" void app_main()
     CHECK_LOAD_STAGE(start_motors(), "Motors");
     CHECK_LOAD_STAGE(start_serial(), "Serial control");
     CHECK_LOAD_STAGE(start_control(), "Control system");
-    CHECK_LOAD_STAGE(start_bt_serial(), "Bluetooth");
+    // CHECK_LOAD_STAGE(start_bt_serial(), "Bluetooth");
     if (successfull_boot) {
         led_green(); // boot is done with no errors
     }

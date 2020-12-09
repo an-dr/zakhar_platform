@@ -162,6 +162,10 @@ esp_err_t start_bt_serial(void)
 {
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
 
+
+    uint8_t new_mac[8] = {0xde,0xf9,0x32,0x05,0x7f,0x56};
+    esp_base_mac_addr_set(new_mac);
+
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_RETURN_ERROR(nvs_flash_erase());
