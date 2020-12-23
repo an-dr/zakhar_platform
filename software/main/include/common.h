@@ -59,15 +59,16 @@
 enum reristers {
     REG_CMD = 0x00,
     REG_ARG = 0x01,
-    REG_SPEED = 0x02,
-    REG_RPM_L = 0x03,
-    REG_RPM_R = 0x04,
-    REG_ANGLE_X_SIGN = 0x05,
-    REG_ANGLE_X = 0x06,
-    REG_ANGLE_Y_SIGN = 0x07,
-    REG_ANGLE_Y = 0x08,
-    REG_ANGLE_Z_SIGN = 0x09,
-    REG_ANGLE_Z = 0x0A,
+    REG_MODE = 0x02,
+    REG_SPEED = 0x03,
+    REG_RPM_L = 0x04,
+    REG_RPM_R = 0x05,
+    REG_ANGLE_X_SIGN = 0x06,
+    REG_ANGLE_X = 0x07,
+    REG_ANGLE_Y_SIGN = 0x08,
+    REG_ANGLE_Y = 0x09,
+    REG_ANGLE_Z_SIGN = 0x0A,
+    REG_ANGLE_Z = 0x0B,
 };
 
 /*********************************************************************** Registers*/
