@@ -101,12 +101,13 @@ esp_err_t i2c_master_init(gpio_num_t sda, gpio_num_t scl, uint32_t clock)
  */
 static esp_err_t reg_tx_upd()
 {
-    uint8_t rd_val = regs.GetReg();
+    // TODO: regs
+    // uint8_t rd_val = regs.GetReg();
     ESP_RETURN_ERROR(i2c_reset_tx_fifo(I2C_NUM_1));
-    int res = i2c_slave_write_buffer(I2C_NUM_1, &rd_val, 1, 0);
-    if (!res) {
-        return ESP_FAIL;
-    }
+    // int res = i2c_slave_write_buffer(I2C_NUM_1, &rd_val, 1, 0);
+    // if (!res) {
+        // return ESP_FAIL;
+    // }
     return ESP_OK;
 }
 
@@ -131,11 +132,13 @@ static void i2c_reader_task(void*)
         /* flush others - we are not waiting it */
         if (data[1] != 0xFF) {
             // write
-            regs.Write(data[0], data[1]);
+            // TODO: regs
+            // regs.Write(data[0], data[1]);
             ESP_LOGI(TAG, "Wrote 0x%x : 0x%x", data[0], data[1]);
         } else {
             // select
-            regs.SelectReg(data[0]);
+            // TODO: regs
+            // regs.SelectReg(data[0]);
             esp_err_t res = reg_tx_upd();
             if (res != ESP_OK) {
                 ESP_LOGE(TAG, "Cannot send a value (%s)", ESTR(res));

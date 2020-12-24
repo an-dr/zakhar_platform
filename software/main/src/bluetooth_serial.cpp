@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "SharedVirtualRegisters.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "freertos/FreeRTOS.h"
@@ -20,6 +21,7 @@
 #include "esp_gap_bt_api.h"
 #include "esp_bt_device.h"
 #include "esp_spp_api.h"
+#include "projdefs.h"
 #include "soc/rtc_cntl_reg.h"
 
 #include "time.h"
@@ -82,7 +84,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 #if (SPP_SHOW_MODE == SPP_SHOW_DATA)
         ESP_LOGI(SPP_TAG, "ESP_SPP_DATA_IND_EVT len=%d handle=%d",
                  param->data_ind.len, param->data_ind.handle);
-        regs.Write(REG_CMD, *(uint8_t*)param->data_ind.data);
+        SVR_Set(&regs, REG_CMD, *(uint8_t*)param->data_ind.data, false, pdMS_TO_TICKS(1000));
         // esp_log_buffer_hex("",param->data_ind.data,param->data_ind.len);
 #else
         gettimeofday(&time_new, NULL);

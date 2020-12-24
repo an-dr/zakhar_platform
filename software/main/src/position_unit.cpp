@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "SharedVirtualRegisters.h"
 #include "driver/gpio.h"
 #include "driver/i2c.h"
 #include "esp_err.h"
@@ -39,6 +40,7 @@ static mpud::float_axes_t gyro_calibr; // gyro axes in (DPS) º/s format
 static uint32_t mpu_period_ms = 1000 / MPU_SAMPLE_RATE_HZ;
 static mpud::float_axes_t angles;
 static float angles_threshold = 0.7;
+static uint8_t buf_to_regs[6];
 
 static void update_accel_data(void)
 {
@@ -101,10 +103,17 @@ void convert_angle_2_sign_and_angle(float val, uint8_t* reg_s_p, uint8_t* reg_va
 
 static void load_angles_to_regs(mpud::float_axes_t* angles)
 {
-    uint8_t* r_p = regs.GetRegs();
-    convert_angle_2_sign_and_angle(angles->x, &r_p[REG_ANGLE_X_SIGN], &r_p[REG_ANGLE_X]);
-    convert_angle_2_sign_and_angle(angles->y, &r_p[REG_ANGLE_Y_SIGN], &r_p[REG_ANGLE_Y]);
-    convert_angle_2_sign_and_angle(angles->z, &r_p[REG_ANGLE_Z_SIGN], &r_p[REG_ANGLE_Z]);
+    convert_angle_2_sign_and_angle(angles->x, &buf_to_regs[0], &buf_to_regs[1]);
+    SVR_Set(&regs, REG_ANGLE_X_SIGN, buf_to_regs[0], false, pdMS_TO_TICKS(1000));
+    SVR_Set(&regs, REG_ANGLE_X, buf_to_regs[1], false, pdMS_TO_TICKS(1000));
+
+    convert_angle_2_sign_and_angle(angles->y, &buf_to_regs[2], &buf_to_regs[3]);
+    SVR_Set(&regs, REG_ANGLE_Y_SIGN, buf_to_regs[2], false, pdMS_TO_TICKS(1000));
+    SVR_Set(&regs, REG_ANGLE_Y, buf_to_regs[3], false, pdMS_TO_TICKS(1000));
+
+    convert_angle_2_sign_and_angle(angles->z, &buf_to_regs[4], &buf_to_regs[5]);
+    SVR_Set(&regs, REG_ANGLE_Z_SIGN, buf_to_regs[4], false, pdMS_TO_TICKS(1000));
+    SVR_Set(&regs, REG_ANGLE_Z, buf_to_regs[5], false, pdMS_TO_TICKS(1000));
 }
 
 static void process_gyro_data(void)
@@ -123,7 +132,7 @@ static void mpu_task(void*)
         process_gyro_data();
 #if PRINT_ANGLES
         printf("angles(prec|int(º)): [ %f\t%f\t%f ]\t", angles[0], angles[1], angles[2]);
-        printf("[ %d\t%d\t%d\t%d ]\n", (int8_t)REGR(REG_ANGLE_X), (int8_t)REGR(REG_ANGLE_Y), (uint8_t)REGR(REG_ANGLE_Z_SIGN), (uint8_t)REGR(REG_ANGLE_Z));
+        printf("[ %d\t%d\t%d\t%d ]\n", buf_to_regs[1], buf_to_regs[3], buf_to_regs[4], buf_to_regs[5]);
 #endif
         vTaskDelay(mpu_period_ms / portTICK_PERIOD_MS);
     }

@@ -58,17 +58,16 @@
 
 enum reristers {
     REG_CMD = 0x00,
-    REG_ARG = 0x01,
-    REG_MODE = 0x02,
-    REG_SPEED = 0x03,
-    REG_RPM_L = 0x04,
-    REG_RPM_R = 0x05,
-    REG_ANGLE_X_SIGN = 0x06,
-    REG_ANGLE_X = 0x07,
-    REG_ANGLE_Y_SIGN = 0x08,
-    REG_ANGLE_Y = 0x09,
-    REG_ANGLE_Z_SIGN = 0x0A,
-    REG_ANGLE_Z = 0x0B,
+    REG_ARG,
+    REG_MODE,
+    REG_SPEED,
+    REG_ANGLE_X_SIGN,
+    REG_ANGLE_X,
+    REG_ANGLE_Y_SIGN,
+    REG_ANGLE_Y,
+    REG_ANGLE_Z_SIGN,
+    REG_ANGLE_Z,
+    REGS_AMOUNT
 };
 
 /*********************************************************************** Registers*/
@@ -77,16 +76,16 @@ enum reristers {
 #define PIN_I2C_S_SDA GPIO_NUM_14
 #define PIN_I2C_S_SCL GPIO_NUM_27
 
-#define PIN_MPU_I2C_SDA GPIO_NUM_21
-#define PIN_MPU_I2C_SCL GPIO_NUM_19
+#define PIN_MPU_I2C_SDA GPIO_NUM_27
+#define PIN_MPU_I2C_SCL GPIO_NUM_25
 
-#define PIN_GREEN GPIO_NUM_22
-#define PIN_RED GPIO_NUM_23
+#define PIN_GREEN GPIO_NUM_21
+#define PIN_RED GPIO_NUM_22
 
-#define PIN_MOTOR_R1 GPIO_NUM_32
-#define PIN_MOTOR_R2 GPIO_NUM_33
-#define PIN_MOTOR_L1 GPIO_NUM_25
-#define PIN_MOTOR_L2 GPIO_NUM_26
+#define PIN_MOTOR_R1 GPIO_NUM_26
+#define PIN_MOTOR_R2 GPIO_NUM_5
+#define PIN_MOTOR_L1 GPIO_NUM_23
+#define PIN_MOTOR_L2 GPIO_NUM_19
 
 /*********************************************************************** Pinout*/
 /* Commands

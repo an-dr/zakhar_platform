@@ -52,11 +52,12 @@ esp_err_t init_indication()
     ESP_RETURN_ERROR(gpio_config(&io_conf)); //configure GPIO with the given settings
 
     ESP_RETURN_ERROR(gpio_set_level((gpio_num_t)PIN_GREEN, 1));
-    ESP_RETURN_ERROR(gpio_set_level((gpio_num_t)PIN_RED, 1));
-    vTaskDelay(200 / portTICK_RATE_MS);
+    vTaskDelay(400 / portTICK_RATE_MS);
     ESP_RETURN_ERROR(gpio_set_level((gpio_num_t)PIN_GREEN, 0));
+    ESP_RETURN_ERROR(gpio_set_level((gpio_num_t)PIN_RED, 1));
+    vTaskDelay(400 / portTICK_RATE_MS);
     ESP_RETURN_ERROR(gpio_set_level((gpio_num_t)PIN_RED, 0));
-    vTaskDelay(200 / portTICK_RATE_MS);
-    ESP_LOGI(TAG, "Indication ready");
+    vTaskDelay(400 / portTICK_RATE_MS);
+    ESP_LOGI(TAG, "Indication is ready");
     return ESP_OK;
 }

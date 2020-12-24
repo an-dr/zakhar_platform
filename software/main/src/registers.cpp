@@ -7,6 +7,7 @@
  * e-mail:  mail@agramakov.me
  */
 
-#include "registers.hpp"
+// #include "registers.hpp"
+#include "svr_types.h"
 
-SharedVirtualRegisters regs(32);
+SharedVirtualRegisters_t regs;

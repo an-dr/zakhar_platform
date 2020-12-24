@@ -10,11 +10,13 @@
 //
 // *************************************************************************
 
+#include "SharedVirtualRegisters.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "projdefs.h"
 #include "registers.hpp"
 #include <stdio.h>
 
@@ -27,8 +29,8 @@ static void serial_task(void*)
     while (1) {
         ch = fgetc(stdin);
         if (ch != 0xFF) {
-            regs.Write(REG_CMD, ch);
-            ESP_LOGD(TAG, "Got: %c", regs.Read(REG_CMD));
+            SVR_Set(&regs,REG_CMD,ch,false,pdMS_TO_TICKS(1000));
+            ESP_LOGD(TAG, "Got: %c", ch);
         }
         vTaskDelay(1);
     }

@@ -43,13 +43,14 @@ ControlCallbacks Cc(connection, SIZE_ARR(connection));
 void control_poll(void *)
 {
     while (1) {
-        int new_cmd = regs.Read(REG_CMD);
-        if ((new_cmd != (CMD_NONE & 0xFF)) & (new_cmd != CMD_DONE)) {
-            ESP_LOGD(TAG, "New Command: 0x%x", new_cmd);
-            Cc.Exec(new_cmd);
-            REGW(REG_CMD,CMD_DONE);
-            REGW(REG_ARG,0);
-        }
+        // TODO: regs
+        // int new_cmd = regs.Read(REG_CMD);
+        // if ((new_cmd != (CMD_NONE & 0xFF)) & (new_cmd != CMD_DONE)) {
+        //     ESP_LOGD(TAG, "New Command: 0x%x", new_cmd);
+        //     Cc.Exec(new_cmd);
+        //     REGW(REG_CMD,CMD_DONE);
+        //     REGW(REG_ARG,0);
+        // }
         vTaskDelay(1);
     }
 }

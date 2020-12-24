@@ -7,6 +7,7 @@
  * e-mail:  mail@agramakov.me
  */
 
+#include "SharedVirtualRegisters.h"
 #include "esp_err.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
@@ -120,7 +121,7 @@ void SetSpeed(MotorsSpeed_t speed)
     default:
         break;
     }
-    REGW(REG_SPEED, (uint8_t)speed);
+    SVR_Set(&regs, REG_SPEED, (SVR_reg_t)speed, false, pdMS_TO_TICKS(1000));
 }
 
 

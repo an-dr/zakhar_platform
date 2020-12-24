@@ -10,21 +10,16 @@
 #pragma once
 
 #include "common.h"
-#include "SharedVirtualRegisters.hpp"
+#include "SharedVirtualRegisters.h"
+#include "svr_types.h"
 
-#define REGR(n) (regs.Read(n))
-#define REGW(n,v) (regs.Write(n,v))
+extern SharedVirtualRegisters_t regs;
 
-extern SharedVirtualRegisters regs;
-
-inline uint8_t regs_get_cmd(void){
-    return regs.Read(REG_CMD);
-}
-
-inline uint8_t regs_get_arg(void){
-    return regs.Read(REG_ARG);
-}
-
-inline uint8_t regs_get_angle_z(void){
-    return regs.Read(REG_ANGLE_Z);
+inline esp_err_t regs_init()
+{
+    bool res = SVR_Init(&regs, REGS_AMOUNT);
+    if (res) {
+        return ESP_OK;
+    }
+    return ESP_FAIL;
 }

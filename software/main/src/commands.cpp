@@ -93,18 +93,19 @@ static void rough_position(Motors_dc2platform_pnt_t rot_direction)
 
 static void set_position_do(Motors_dc2platform_pnt_t rot_direction, bool target_sign, uint8_t target_angle)
 {
-    uint8_t current_angle = REGR(REG_ANGLE_Z);
-    uint8_t current_sign = REGR(REG_ANGLE_Z_SIGN);
-    while ((current_sign != target_sign) || (current_angle != target_angle)) {
-        current_angle = REGR(REG_ANGLE_Z);
-        current_sign = REGR(REG_ANGLE_Z_SIGN);
-        if (current_sign == target_sign) { // right sign
-            precise_position(current_angle, target_angle, current_sign);
-        } else { // wait the right sign
-            rough_position(rot_direction);
-        }
-        vTaskDelay(1);
-    }
+    // TODO: regs
+    // uint8_t current_angle = REGR(REG_ANGLE_Z);
+    // uint8_t current_sign = REGR(REG_ANGLE_Z_SIGN);
+    // while ((current_sign != target_sign) || (current_angle != target_angle)) {
+    //     current_angle = REGR(REG_ANGLE_Z);
+    //     current_sign = REGR(REG_ANGLE_Z_SIGN);
+    //     if (current_sign == target_sign) { // right sign
+    //         precise_position(current_angle, target_angle, current_sign);
+    //     } else { // wait the right sign
+    //         rough_position(rot_direction);
+    //     }
+    //     vTaskDelay(1);
+    // }
     Stop();
 }
 
@@ -128,9 +129,10 @@ void A(void)
     Motors_dc2platform_pnt_t action = &Motors_dc2platform::MoveLeft;
     SetAction(action);
 #if MPU_ENABLED
-    if (regs_get_arg()) {
-        set_position(action, regs_get_arg());
-    }
+    // TODO: regs
+    // if (regs_get_arg()) {
+        // set_position(action, regs_get_arg());
+    // }
 #endif
 }
 
@@ -140,9 +142,10 @@ void D(void)
     Motors_dc2platform_pnt_t action = &Motors_dc2platform::MoveRight;
     SetAction(action);
 #if MPU_ENABLED
-    if (regs_get_arg()) {
-        set_position(action, regs_get_arg());
-    }
+    // TODO: regs
+    // if (regs_get_arg()) {
+        // set_position(action, regs_get_arg());
+    // }
 #endif
 }
 
