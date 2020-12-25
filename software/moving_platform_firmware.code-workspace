@@ -36,7 +36,11 @@
 			"esp_bt_main.h": "c",
 			"esp_bt.h": "c",
 			"cstring": "cpp",
-			"random": "cpp"
+			"random": "cpp",
+			"chrono": "cpp",
+			"algorithm": "cpp",
+			"xhash": "cpp",
+			"xtree": "cpp"
 		},
 		"autoHide.autoHidePanel": false,
 		"autoHide.autoHideSideBar": false,

@@ -72,22 +72,26 @@ extern "C" void app_main()
     ESP_LOGI(TAG, "Init done %s", (successfull_boot ? "successfully" : "with errors"));
 
 #if PRINT_REGS
-    SVR_reg_t buf[REGS_AMOUNT] = {0};
+    int res;
+    SVR_reg_t buf[16] = {0};
     while (1) {
+        // BUG: for some reason can hang the system
         vTaskDelay(100 / portTICK_RATE_MS);
-        SVR_Dump(&regs, 0, REGS_AMOUNT, buf, false, pdTICKS_TO_MS(1000));
-        ESP_LOGI(TAG, "regs: [ 0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x ]",
-            buf[REG_CMD],
-            buf[REG_ARG],
-            buf[REG_MODE],
-            buf[REG_SPEED],
-            buf[REG_ANGLE_X_SIGN],
-            buf[REG_ANGLE_X],
-            buf[REG_ANGLE_Y_SIGN],
-            buf[REG_ANGLE_Y],
-            buf[REG_ANGLE_Z_SIGN],
-            buf[REG_ANGLE_Z]
-            );
+        res = SVR_Dump(&regs, 0, REGS_AMOUNT, buf, false, pdTICKS_TO_MS(1000));
+        if(res){
+            ESP_LOGI(TAG, "regs: [ 0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x ]",
+                buf[REG_CMD],
+                buf[REG_ARG],
+                buf[REG_MODE],
+                buf[REG_SPEED],
+                buf[REG_ANGLE_X_SIGN],
+                buf[REG_ANGLE_X],
+                buf[REG_ANGLE_Y_SIGN],
+                buf[REG_ANGLE_Y],
+                buf[REG_ANGLE_Z_SIGN],
+                buf[REG_ANGLE_Z]
+                );
+        }
     }
 #endif
     while (1) {

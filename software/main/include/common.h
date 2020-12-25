@@ -16,7 +16,7 @@
    ********************************************************************* */
 
 #define DEBUG 1
-#define PRINT_REGS 1
+#define PRINT_REGS 0
 #define PRINT_ANGLES 0
 
 // i2c
@@ -74,7 +74,7 @@ enum reristers {
 /* Pinout
    ********************************************************************* */
 #define PIN_I2C_S_SDA GPIO_NUM_14
-#define PIN_I2C_S_SCL GPIO_NUM_27
+#define PIN_I2C_S_SCL GPIO_NUM_9
 
 #define PIN_MPU_I2C_SDA GPIO_NUM_27
 #define PIN_MPU_I2C_SCL GPIO_NUM_25

@@ -11,12 +11,16 @@
 
 #include <cstring>
 
+#include "SharedVirtualRegisters.h"
 #include "common.h"
 #include "driver/i2c.h"
 #include "esp_log.h"
+#include "freertos/portmacro.h"
+#include "projdefs.h"
 #include "registers.hpp"
 
 static const char* TAG = "zk_i2c";
+
 
 // static intr_handle_t intr_handle;       /*!< I2C interrupt handle*/
 
@@ -106,49 +110,87 @@ static esp_err_t reg_tx_upd()
     ESP_RETURN_ERROR(i2c_reset_tx_fifo(I2C_NUM_1));
     // int res = i2c_slave_write_buffer(I2C_NUM_1, &rd_val, 1, 0);
     // if (!res) {
-        // return ESP_FAIL;
+    // return ESP_FAIL;
     // }
     return ESP_OK;
 }
 
 static void i2c_reader_task(void*)
 {
-    uint8_t data[3] = { 0 };
+    uint8_t reg_num_buf;
+    uint8_t reg_data_buf;
+
     int data_count;
     while (1) {
-        /* waiting for register to select */
         data_count = 0;
-        data_count += i2c_slave_read_buffer(I2C_NUM_1, &data[0], 1, portMAX_DELAY);
-        data_count += i2c_slave_read_buffer(I2C_NUM_1, &data[1], 1, 0);
-        if (data_count != 2) {
-            ESP_LOGE(TAG, "Wrong frame! Ignore");
-            while (1) {
-                if (!i2c_slave_read_buffer(I2C_NUM_1, &data[2], 1, 0)) {
-                    break;
-                }
-            }
-            continue;
+
+        /* Reg num */
+        if (i2c_slave_read_buffer(I2C_NUM_1, &reg_num_buf, 1, portMAX_DELAY) > 0) {
+            ESP_LOGI(TAG, "Got regnum: 0x%x", reg_num_buf);
         }
+
+        /* Data */
+        while (1) {
+            if (i2c_slave_read_buffer(I2C_NUM_1, &reg_data_buf, 1, 0) <= 0) {
+                break;
+            } else {
+                data_count++;
+                ESP_LOGI(TAG, "Got data: 0x%x", reg_data_buf);
+            }
+        }
+
+        /* No data - write*/
+        if (!data_count){
+            SVR_Get(&regs, reg_num_buf, &reg_data_buf, false, pdMS_TO_TICKS(1000));
+            i2c_reset_tx_fifo(I2C_NUM_1);
+            i2c_slave_write_buffer(I2C_NUM_1, &reg_data_buf, 1, 0);
+            ESP_LOGI(TAG, "Set data to send: 0x%x", reg_data_buf);
+        }
+        i2c_reset_rx_fifo(I2C_NUM_1);
+
+        //     data_count += i2c_slave_read_buffer(I2C_NUM_1, &reg_num_buf, 1, 0);
+        //     ESP_LOGI(TAG, "Got data: 0x%x",reg_data_buf);
+        // }
+
+        // /* Interaction with registers */
+        // if (data_count >= 2){
+        //     SVR_Set(&regs, reg_num_buf, reg_data_buf, false, pdMS_TO_TICKS(1000));
+        //     ESP_LOGI(TAG, "Wrote to 0x%x : 0x%x", reg_num_buf, reg_data_buf);
+        // } else { /* data_count == 1; zero is impossible because of portMAX_DELAY above */
+        //     i2c_reset_tx_fifo(I2C_NUM_1);  // clear old tx fifo
+        //     SVR_Get(&regs, reg_num_buf, &reg_data_buf, false, pdMS_TO_TICKS(1000));
+        //     i2c_slave_write_buffer(I2C_NUM_1, &reg_data_buf, 1, pdMS_TO_TICKS(1000));
+        //     ESP_LOGI(TAG, "Read from 0x%x : 0x%x", reg_num_buf, reg_data_buf);
+        // }
+
+        // if (data_count != 2) {
+        //     ESP_LOGE(TAG, "Wrong frame! Ignore");
+        //     while (1) {
+        //         if (!i2c_slave_read_buffer(I2C_NUM_1, &data[2], 1, 0)) {
+        //             break;
+        //         }
+        //     }
+        //     continue;
+        // }
         /* flush others - we are not waiting it */
-        if (data[1] != 0xFF) {
-            // write
-            // TODO: regs
-            // regs.Write(data[0], data[1]);
-            ESP_LOGI(TAG, "Wrote 0x%x : 0x%x", data[0], data[1]);
-        } else {
-            // select
-            // TODO: regs
-            // regs.SelectReg(data[0]);
-            esp_err_t res = reg_tx_upd();
-            if (res != ESP_OK) {
-                ESP_LOGE(TAG, "Cannot send a value (%s)", ESTR(res));
-            }
-            ESP_LOGI(TAG, "Selected register: 0x%x", data[0]);
-        }
+        // if (data[1] != 0xFF) {
+        //     // write
+        //     SVR_Set(&regs, data[0], data[1], false, pdMS_TO_TICKS(1000));
+        //     ESP_LOGI(TAG, "Wrote 0x%x : 0x%x", data[0], data[1]);
+        // } else {
+        //     // select
+        //     // TODO: regs
+        //     // regs.SelectReg(data[0]);
+        //     esp_err_t res = reg_tx_upd();
+        //     if (res != ESP_OK) {
+        //         ESP_LOGE(TAG, "Cannot send a value (%s)", ESTR(res));
+        //     }
+        //     ESP_LOGI(TAG, "Selected register: 0x%x", data[0]);
+        // }
+        vTaskDelay(1);
+
     }
 }
-
-
 
 /**
  * @brief Updates tx fifo with a single byte from the selected register to be
@@ -173,10 +215,10 @@ esp_err_t start_i2c_slave(void)
     if (res != pdPASS) {
         return ESP_FAIL;
     }
-    res = xTaskCreatePinnedToCore(i2c_writer_task, "i2c_writer_task", 1024 * 4, NULL, 5, NULL, 0);
-    if (res != pdPASS) {
-        return ESP_FAIL;
-    }
+    // res = xTaskCreatePinnedToCore(i2c_writer_task, "i2c_writer_task", 1024 * 4, NULL, 5, NULL, 0);
+    // if (res != pdPASS) {
+    //     return ESP_FAIL;
+    // }
     ESP_LOGI(TAG, "I2C slave ready! Address: 0x%x", PLATFORM_I2C_ADDRESS);
     return ESP_OK;
 }
