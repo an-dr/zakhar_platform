@@ -12,6 +12,7 @@ set(srcs
             "src/bluetooth_serial.cpp"
             "src/commands.cpp"
             "src/hw_motors_impl.cpp"
+            "src/i2c_mod.c"
             "src/indication.cpp"
             "src/position_unit.cpp"
             "src/controlcallback.cpp"

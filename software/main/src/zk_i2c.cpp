@@ -13,7 +13,8 @@
 
 #include "SharedVirtualRegisters.h"
 #include "common.h"
-#include "driver/i2c.h"
+// #include "driver/i2c.h"
+#include "i2c_mod.h"
 #include "esp_log.h"
 #include "freertos/portmacro.h"
 #include "projdefs.h"
