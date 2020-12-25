@@ -14,6 +14,8 @@
 #include "svr_types.h"
 
 extern SharedVirtualRegisters_t regs;
+extern uint8_t reg_selected;
+
 
 inline esp_err_t regs_init()
 {

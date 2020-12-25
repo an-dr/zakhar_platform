@@ -30,6 +30,7 @@
 #include "soc/i2c_periph.h"
 #include "i2c_mod.h"
 #include "driver/periph_ctrl.h"
+#include "registers.hpp"
 
 static const char *I2C_TAG = "i2c";
 #define I2C_CHECK(a, str, ret)  if(!(a)) {                                             \
@@ -461,15 +462,24 @@ static void IRAM_ATTR i2c_isr_handler_default(void *arg)
             .type = I2C_CMD_EVT_ALIVE
         };
         xQueueSendFromISR(p_i2c->cmd_evt_queue, &evt, &HPTaskAwoken);
-    } else {
+    } else {  /* slave */
+
+        /* Regs for writing back */
+        unsigned r_sz;
+        const SVR_reg_t* r = SVR_get_regs(&regs,&r_sz);
+
+        /* Handling */
         i2c_hal_slave_handle_event(&(i2c_context[i2c_num].hal), &evt_type);
         if (evt_type == I2C_INTR_EVENT_TRANS_DONE || evt_type == I2C_INTR_EVENT_RXFIFO_FULL) {
+            ets_printf("RX\r\n");
+
             uint32_t rx_fifo_cnt;
             i2c_hal_get_rxfifo_cnt(&(i2c_context[i2c_num].hal), &rx_fifo_cnt);
             i2c_hal_read_rxfifo(&(i2c_context[i2c_num].hal), p_i2c->data_buf, rx_fifo_cnt);
             xRingbufferSendFromISR(p_i2c->rx_ring_buf, p_i2c->data_buf, rx_fifo_cnt, &HPTaskAwoken);
             i2c_hal_slave_clr_rx_it(&(i2c_context[i2c_num].hal));
-        } else if (evt_type == I2C_INTR_EVENT_TXFIFO_EMPTY) {
+
+        } else if (evt_type == I2C_INTR_EVENT_TXFIFO_EMPTY) { // All sent
             uint32_t tx_fifo_rem;
             i2c_hal_get_txfifo_cnt(&(i2c_context[i2c_num].hal), &tx_fifo_rem);
             size_t size = 0;

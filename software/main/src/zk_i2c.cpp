@@ -148,7 +148,6 @@ static esp_err_t reg_tx_upd()
     return ESP_OK;
 }
 
-static uint8_t reg_num_buf;
 static uint8_t reg_data_buf;
 
 static void i2c_reader_task(void*)
@@ -160,13 +159,13 @@ static void i2c_reader_task(void*)
     const SVR_reg_t* r = SVR_get_regs(&regs,&r_sz);
     while (1) {
         data_count = 0;
-        i2c_reset_tx_fifo(I2C_NUM_1);
+        // i2c_reset_tx_fifo(I2C_NUM_1);
 
 
         /* Reg num */
-        if (i2c_slave_read_buffer(I2C_NUM_1, &reg_num_buf, 1, portMAX_DELAY) > 0) {
-            i2c_slave_write_buffer(I2C_NUM_1, &r[reg_num_buf], 1, 0);
-            ESP_LOGI(TAG, "Got regnum: 0x%x", reg_num_buf);
+        if (i2c_slave_read_buffer(I2C_NUM_1, &reg_selected, 1, portMAX_DELAY) > 0) {
+            // i2c_slave_write_buffer(I2C_NUM_1, &r[reg_selected], 1, 0);
+            ESP_LOGI(TAG, "Got regnum: 0x%x", reg_selected);
         }
 
         /* Data */
@@ -181,11 +180,11 @@ static void i2c_reader_task(void*)
 
         if (!data_count) { /* No data - write to I2C TX FIFO*/
             // i2c_reset_tx_fifo(I2C_NUM_1);
-            // SVR_Get(&regs, reg_num_buf, &reg_data_buf, false, pdMS_TO_TICKS(1000));
+            // SVR_Get(&regs, reg_selected, &reg_data_buf, false, pdMS_TO_TICKS(1000));
             // i2c_slave_write_buffer(I2C_NUM_1, &reg_data_buf, 1, 0);
             // ESP_LOGI(TAG, "Set data to send: 0x%x", reg_data_buf);
         } else { /* Save data */
-            SVR_Set(&regs, reg_num_buf, reg_data_buf, false, pdMS_TO_TICKS(1000));
+            SVR_Set(&regs, reg_selected, reg_data_buf, false, pdMS_TO_TICKS(1000));
         }
         i2c_reset_rx_fifo(I2C_NUM_1);
 
@@ -197,21 +196,21 @@ static void i2c_reader_task(void*)
  * @brief Updates tx fifo with a single byte from the selected register to be
  * read by master
  */
-static void i2c_writer_task(void*)
-{
-    unsigned r_sz;
-    const SVR_reg_t* r = SVR_get_regs(&regs,&r_sz);
-    while (1) {
-        i2c_reset_tx_fifo(I2C_NUM_1);
-        i2c_slave_write_buffer(I2C_NUM_1, &r[reg_num_buf], 1, 0);
+// static void i2c_writer_task(void*)
+// {
+//     unsigned r_sz;
+//     const SVR_reg_t* r = SVR_get_regs(&regs,&r_sz);
+//     while (1) {
+//         i2c_reset_tx_fifo(I2C_NUM_1);
+//         i2c_slave_write_buffer(I2C_NUM_1, &r[reg_selected], 1, 0);
 
-        // res = reg_tx_upd();
-        // if (res != ESP_OK) {
-        // ESP_LOGE(TAG, "Can't load a value to the TX FIFO!");
-        // }
-        vTaskDelay(1);
-    }
-}
+//         // res = reg_tx_upd();
+//         // if (res != ESP_OK) {
+//         // ESP_LOGE(TAG, "Can't load a value to the TX FIFO!");
+//         // }
+//         vTaskDelay(1);
+//     }
+// }
 
 esp_err_t start_i2c_slave(void)
 {

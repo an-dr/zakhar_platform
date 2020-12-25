@@ -11,3 +11,4 @@
 #include "svr_types.h"
 
 SharedVirtualRegisters_t regs;
+uint8_t reg_selected;
