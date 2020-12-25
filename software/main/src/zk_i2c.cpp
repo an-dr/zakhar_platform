@@ -21,48 +21,72 @@
 
 static const char* TAG = "zk_i2c";
 
-
-// static intr_handle_t intr_handle;       /*!< I2C interrupt handle*/
+static intr_handle_t intr_handle;       /*!< I2C interrupt handle*/
 
 // static i2c_context_t i2c_context[I2C_NUM_MAX] = {
 //     I2C_CONTEX_INIT_DEF(I2C_NUM_0),
 //     I2C_CONTEX_INIT_DEF(I2C_NUM_1),
 // };
 
-// TODO: rewrite the handler
-// void zk_i2c_isr_handler(){
+// static void IRAM_ATTR zk_i2c_isr_handler(void *arg)
+// {
+//     i2c_obj_t *p_i2c = (i2c_obj_t *) arg;
+//     int i2c_num = p_i2c->i2c_num;
 //     i2c_intr_event_t evt_type = I2C_INTR_EVENT_ERR;
-//     i2c_hal_slave_handle_event(&(i2c_context[I2C_NUM_1].hal), &evt_type);
-//     if (evt_type == I2C_INTR_EVENT_TRANS_DONE || evt_type ==
-//     I2C_INTR_EVENT_RXFIFO_FULL) {
-//         // new transmission
-//         // uint32_t rx_fifo_cnt;
-//         // i2c_hal_get_rxfifo_cnt(&(i2c_context[i2c_num].hal),
-//         &rx_fifo_cnt);
-//         // i2c_hal_read_rxfifo(&(i2c_context[i2c_num].hal), p_i2c->data_buf,
-//         rx_fifo_cnt);
-//         // xRingbufferSendFromISR(p_i2c->rx_ring_buf, p_i2c->data_buf,
-//         rx_fifo_cnt, &HPTaskAwoken);
-//         // i2c_hal_slave_clr_rx_it(&(i2c_context[i2c_num].hal));
-//     } else if (evt_type == I2C_INTR_EVENT_TXFIFO_EMPTY) {
-//         // everything is sent
-//         // uint32_t tx_fifo_rem;
-//         // i2c_hal_get_txfifo_cnt(&(i2c_context[i2c_num].hal),
-//         &tx_fifo_rem);
-//         // size_t size = 0;
-//         // uint8_t *data = (uint8_t *)
-//         xRingbufferReceiveUpToFromISR(p_i2c->tx_ring_buf, &size,
-//         tx_fifo_rem);
-//         // if (data) {
-//             // i2c_hal_write_txfifo(&(i2c_context[i2c_num].hal), data,
-//             size);
-//             // vRingbufferReturnItemFromISR(p_i2c->tx_ring_buf, data,
-//             &HPTaskAwoken);
-//         } else {
-//             i2c_hal_disable_slave_tx_it(&(i2c_context[i2c_num].hal));
+//     portBASE_TYPE HPTaskAwoken = pdFALSE;
+//     if (p_i2c->mode == I2C_MODE_MASTER) {
+//         if (p_i2c->status == I2C_STATUS_WRITE) {
+//             i2c_hal_master_handle_tx_event(&(i2c_context[i2c_num].hal), &evt_type);
+//         } else if (p_i2c->status == I2C_STATUS_READ) {
+//             i2c_hal_master_handle_rx_event(&(i2c_context[i2c_num].hal), &evt_type);
 //         }
-//         i2c_hal_slave_clr_tx_it(&(i2c_context[i2c_num].hal));
+//         if (evt_type == I2C_INTR_EVENT_NACK) {
+//             p_i2c_obj[i2c_num]->status = I2C_STATUS_ACK_ERROR;
+//             i2c_master_cmd_begin_static(i2c_num);
+//         } else if (evt_type == I2C_INTR_EVENT_TOUT) {
+//             p_i2c_obj[i2c_num]->status = I2C_STATUS_TIMEOUT;
+//             i2c_master_cmd_begin_static(i2c_num);
+//         } else if (evt_type == I2C_INTR_EVENT_ARBIT_LOST) {
+//             p_i2c_obj[i2c_num]->status = I2C_STATUS_TIMEOUT;
+//             i2c_master_cmd_begin_static(i2c_num);
+//         } else if (evt_type == I2C_INTR_EVENT_END_DET) {
+//             i2c_master_cmd_begin_static(i2c_num);
+//         } else if (evt_type == I2C_INTR_EVENT_TRANS_DONE) {
+//             if (p_i2c->status != I2C_STATUS_ACK_ERROR && p_i2c->status != I2C_STATUS_IDLE) {
+//                 i2c_master_cmd_begin_static(i2c_num);
+//             }
+//         }
+//         i2c_cmd_evt_t evt = {
+//             .type = I2C_CMD_EVT_ALIVE
+//         };
+//         xQueueSendFromISR(p_i2c->cmd_evt_queue, &evt, &HPTaskAwoken);
+//     } else {
+//         i2c_hal_slave_handle_event(&(i2c_context[i2c_num].hal), &evt_type);
+//         if (evt_type == I2C_INTR_EVENT_TRANS_DONE || evt_type == I2C_INTR_EVENT_RXFIFO_FULL) {
+//             uint32_t rx_fifo_cnt;
+//             i2c_hal_get_rxfifo_cnt(&(i2c_context[i2c_num].hal), &rx_fifo_cnt);
+//             i2c_hal_read_rxfifo(&(i2c_context[i2c_num].hal), p_i2c->data_buf, rx_fifo_cnt);
+//             xRingbufferSendFromISR(p_i2c->rx_ring_buf, p_i2c->data_buf, rx_fifo_cnt, &HPTaskAwoken);
+//             i2c_hal_slave_clr_rx_it(&(i2c_context[i2c_num].hal));
+//         } else if (evt_type == I2C_INTR_EVENT_TXFIFO_EMPTY) {
+//             uint32_t tx_fifo_rem;
+//             i2c_hal_get_txfifo_cnt(&(i2c_context[i2c_num].hal), &tx_fifo_rem);
+//             size_t size = 0;
+//             uint8_t *data = (uint8_t *) xRingbufferReceiveUpToFromISR(p_i2c->tx_ring_buf, &size, tx_fifo_rem);
+//             if (data) {
+//                 i2c_hal_write_txfifo(&(i2c_context[i2c_num].hal), data, size);
+//                 vRingbufferReturnItemFromISR(p_i2c->tx_ring_buf, data, &HPTaskAwoken);
+//             } else {
+//                 i2c_hal_disable_slave_tx_it(&(i2c_context[i2c_num].hal));
+//             }
+//             i2c_hal_slave_clr_tx_it(&(i2c_context[i2c_num].hal));
+//         }
 //     }
+//     //We only need to check here if there is a high-priority task needs to be switched.
+//     if (HPTaskAwoken == pdTRUE) {
+//         portYIELD_FROM_ISR();
+//     }
+// }
 
 esp_err_t i2c_slave_init(gpio_num_t sda, gpio_num_t scl, uint8_t address)
 {
@@ -79,6 +103,14 @@ esp_err_t i2c_slave_init(gpio_num_t sda, gpio_num_t scl, uint8_t address)
     ESP_RETURN_ERROR(i2c_driver_install(I2C_NUM_1, conf_slave.mode,
         I2C_SLAVE_RX_BUF_LEN,
         I2C_SLAVE_TX_BUF_LEN, 0));
+    // ESP_RETURN_ERROR(i2c_isr_register(
+    //     I2C_NUM_1,
+    //     zk_i2c_isr_handler,
+    //     NULL,
+    //     0,
+    //     intr_handle )
+
+    // )
 
     return ESP_OK;
 }
@@ -115,17 +147,24 @@ static esp_err_t reg_tx_upd()
     return ESP_OK;
 }
 
+static uint8_t reg_num_buf;
+static uint8_t reg_data_buf;
+
 static void i2c_reader_task(void*)
 {
-    uint8_t reg_num_buf;
-    uint8_t reg_data_buf;
 
     int data_count;
+
+    unsigned r_sz;
+    const SVR_reg_t* r = SVR_get_regs(&regs,&r_sz);
     while (1) {
         data_count = 0;
+        i2c_reset_tx_fifo(I2C_NUM_1);
+
 
         /* Reg num */
         if (i2c_slave_read_buffer(I2C_NUM_1, &reg_num_buf, 1, portMAX_DELAY) > 0) {
+            i2c_slave_write_buffer(I2C_NUM_1, &r[reg_num_buf], 1, 0);
             ESP_LOGI(TAG, "Got regnum: 0x%x", reg_num_buf);
         }
 
@@ -139,56 +178,17 @@ static void i2c_reader_task(void*)
             }
         }
 
-        /* No data - write*/
-        if (!data_count){
-            SVR_Get(&regs, reg_num_buf, &reg_data_buf, false, pdMS_TO_TICKS(1000));
-            i2c_reset_tx_fifo(I2C_NUM_1);
-            i2c_slave_write_buffer(I2C_NUM_1, &reg_data_buf, 1, 0);
-            ESP_LOGI(TAG, "Set data to send: 0x%x", reg_data_buf);
+        if (!data_count) { /* No data - write to I2C TX FIFO*/
+            // i2c_reset_tx_fifo(I2C_NUM_1);
+            // SVR_Get(&regs, reg_num_buf, &reg_data_buf, false, pdMS_TO_TICKS(1000));
+            // i2c_slave_write_buffer(I2C_NUM_1, &reg_data_buf, 1, 0);
+            // ESP_LOGI(TAG, "Set data to send: 0x%x", reg_data_buf);
+        } else { /* Save data */
+            SVR_Set(&regs, reg_num_buf, reg_data_buf, false, pdMS_TO_TICKS(1000));
         }
         i2c_reset_rx_fifo(I2C_NUM_1);
 
-        //     data_count += i2c_slave_read_buffer(I2C_NUM_1, &reg_num_buf, 1, 0);
-        //     ESP_LOGI(TAG, "Got data: 0x%x",reg_data_buf);
-        // }
-
-        // /* Interaction with registers */
-        // if (data_count >= 2){
-        //     SVR_Set(&regs, reg_num_buf, reg_data_buf, false, pdMS_TO_TICKS(1000));
-        //     ESP_LOGI(TAG, "Wrote to 0x%x : 0x%x", reg_num_buf, reg_data_buf);
-        // } else { /* data_count == 1; zero is impossible because of portMAX_DELAY above */
-        //     i2c_reset_tx_fifo(I2C_NUM_1);  // clear old tx fifo
-        //     SVR_Get(&regs, reg_num_buf, &reg_data_buf, false, pdMS_TO_TICKS(1000));
-        //     i2c_slave_write_buffer(I2C_NUM_1, &reg_data_buf, 1, pdMS_TO_TICKS(1000));
-        //     ESP_LOGI(TAG, "Read from 0x%x : 0x%x", reg_num_buf, reg_data_buf);
-        // }
-
-        // if (data_count != 2) {
-        //     ESP_LOGE(TAG, "Wrong frame! Ignore");
-        //     while (1) {
-        //         if (!i2c_slave_read_buffer(I2C_NUM_1, &data[2], 1, 0)) {
-        //             break;
-        //         }
-        //     }
-        //     continue;
-        // }
-        /* flush others - we are not waiting it */
-        // if (data[1] != 0xFF) {
-        //     // write
-        //     SVR_Set(&regs, data[0], data[1], false, pdMS_TO_TICKS(1000));
-        //     ESP_LOGI(TAG, "Wrote 0x%x : 0x%x", data[0], data[1]);
-        // } else {
-        //     // select
-        //     // TODO: regs
-        //     // regs.SelectReg(data[0]);
-        //     esp_err_t res = reg_tx_upd();
-        //     if (res != ESP_OK) {
-        //         ESP_LOGE(TAG, "Cannot send a value (%s)", ESTR(res));
-        //     }
-        //     ESP_LOGI(TAG, "Selected register: 0x%x", data[0]);
-        // }
         vTaskDelay(1);
-
     }
 }
 
@@ -198,12 +198,16 @@ static void i2c_reader_task(void*)
  */
 static void i2c_writer_task(void*)
 {
-    esp_err_t res = 0;
+    unsigned r_sz;
+    const SVR_reg_t* r = SVR_get_regs(&regs,&r_sz);
     while (1) {
-        res = reg_tx_upd();
-        if (res != ESP_OK) {
-            ESP_LOGE(TAG, "Can't load a value to the TX FIFO!");
-        }
+        i2c_reset_tx_fifo(I2C_NUM_1);
+        i2c_slave_write_buffer(I2C_NUM_1, &r[reg_num_buf], 1, 0);
+
+        // res = reg_tx_upd();
+        // if (res != ESP_OK) {
+        // ESP_LOGE(TAG, "Can't load a value to the TX FIFO!");
+        // }
         vTaskDelay(1);
     }
 }
