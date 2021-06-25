@@ -43,6 +43,5 @@
     "cstring": "cpp",
     "cstdlib": "cpp"
   },
-  "idf.portWin": "COM14",
   "C_Cpp.dimInactiveRegions": true
 }

@@ -44,6 +44,25 @@ static const char* TAG = "main";
         }                                                    \
     } while (0)
 
+
+static void logging_loop(){
+    #if PRINT_REGS
+        while (1) {
+            vTaskDelay(100 / portTICK_RATE_MS);
+            ESP_LOGI(TAG, "regs: [ 0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x ]",
+                REGR(REG_CMD),
+                REGR(REG_ARG),
+                REGR(REG_SPEED),
+                REGR(REG_ANGLE_X_SIGN),
+                REGR(REG_ANGLE_X),
+                REGR(REG_ANGLE_Y_SIGN),
+                REGR(REG_ANGLE_Y),
+                REGR(REG_ANGLE_Z_SIGN),
+                REGR(REG_ANGLE_Z));
+        }
+    #endif
+}
+
 extern "C" void app_main()
 {
     ESP_LOGI(TAG, "Start!");
@@ -71,21 +90,8 @@ extern "C" void app_main()
     }
     ESP_LOGI(TAG, "Init done %s", (successfull_boot ? "successfully" : "with errors"));
 
-#if PRINT_REGS
-    while (1) {
-        vTaskDelay(100 / portTICK_RATE_MS);
-        ESP_LOGI(TAG, "regs: [ 0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x\t0x%x ]",
-            REGR(REG_CMD),
-            REGR(REG_ARG),
-            REGR(REG_SPEED),
-            REGR(REG_ANGLE_X_SIGN),
-            REGR(REG_ANGLE_X),
-            REGR(REG_ANGLE_Y_SIGN),
-            REGR(REG_ANGLE_Y),
-            REGR(REG_ANGLE_Z_SIGN),
-            REGR(REG_ANGLE_Z));
-    }
-#endif
+    logging_loop();
+
     while (1) {
         vTaskDelay(1);
     }
