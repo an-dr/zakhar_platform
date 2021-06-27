@@ -21,6 +21,7 @@
 
 #include "common.h"
 #include "hw_motors_impl.hpp"
+#include "motors_on_esp32.hpp"
 #include "zk_i2c.h"
 #if MPU_ENABLED
 #include "position_unit.h"
@@ -81,14 +82,26 @@ extern "C" void app_main()
 #endif
 
     CHECK_LOAD_STAGE(start_i2c_slave(), "I2C");
-    CHECK_LOAD_STAGE(start_motors(), "Motors");
+    // CHECK_LOAD_STAGE(start_motors(), "Motors");
     CHECK_LOAD_STAGE(start_serial(), "Serial control");
     CHECK_LOAD_STAGE(start_control(), "Control system");
     CHECK_LOAD_STAGE(start_bt_serial(), "Bluetooth");
+
+#if 1
+    motors_e32.Forward(50.0);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    motors_e32.Stop();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    motors_e32.Backward(10.0);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    motors_e32.Left(25.0);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+#endif
     if (successfull_boot) {
         led_green(); // boot is done with no errors
     }
     ESP_LOGI(TAG, "Init done %s", (successfull_boot ? "successfully" : "with errors"));
+
 
     logging_loop();
 

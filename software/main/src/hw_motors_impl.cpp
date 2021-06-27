@@ -14,6 +14,8 @@
 #include "freertos/portmacro.h"
 #include "freertos/task.h"
 #include "freertos/timers.h"
+#include "driver/mcpwm.h"
+#include "soc/mcpwm_periph.h"
 
 #include "sdkconfig.h"
 #include "registers.hpp"
@@ -159,6 +161,54 @@ void timer_stop_callback(TimerHandle_t xTimer)
     timer_stop();
 }
 
+
+/**
+ * @brief motor moves in forward direction, with duty cycle = duty %
+ */
+static void brushed_motor_forward(mcpwm_unit_t mcpwm_num, mcpwm_timer_t timer_num , float duty_cycle)
+{
+    mcpwm_set_signal_low(mcpwm_num, timer_num, MCPWM_OPR_B);
+    mcpwm_set_duty(mcpwm_num, timer_num, MCPWM_OPR_A, duty_cycle);
+    mcpwm_set_duty_type(mcpwm_num, timer_num, MCPWM_OPR_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
+}
+
+/**
+ * @brief motor moves in backward direction, with duty cycle = duty %
+ */
+static void brushed_motor_backward(mcpwm_unit_t mcpwm_num, mcpwm_timer_t timer_num , float duty_cycle)
+{
+    mcpwm_set_signal_low(mcpwm_num, timer_num, MCPWM_OPR_A);
+    mcpwm_set_duty(mcpwm_num, timer_num, MCPWM_OPR_B, duty_cycle);
+    mcpwm_set_duty_type(mcpwm_num, timer_num, MCPWM_OPR_B, MCPWM_DUTY_MODE_0);  //call this each time, if operator was previously in low/high state
+}
+
+/**
+ * @brief motor stop
+ */
+static void brushed_motor_stop(mcpwm_unit_t mcpwm_num, mcpwm_timer_t timer_num)
+{
+    mcpwm_set_signal_low(mcpwm_num, timer_num, MCPWM_OPR_A);
+    mcpwm_set_signal_low(mcpwm_num, timer_num, MCPWM_OPR_B);
+}
+
+static void init_pwm()
+{
+    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, PIN_MOTOR_R1);
+    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, PIN_MOTOR_R2);
+    mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0A, PIN_MOTOR_L1);
+    mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0B, PIN_MOTOR_L2);
+
+    mcpwm_config_t pwm_config;
+    pwm_config.frequency = 1000;    //frequency = 500Hz,
+    pwm_config.cmpr_a = 0;    //duty cycle of PWMxA = 0
+    pwm_config.cmpr_b = 0;    //duty cycle of PWMxb = 0
+    pwm_config.counter_mode = MCPWM_UP_COUNTER;
+    pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
+    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
+    mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_1, &pwm_config);
+}
+
+
 esp_err_t start_motors()
 {
     motors.MoveForward(100);
@@ -166,6 +216,17 @@ esp_err_t start_motors()
     motors.MoveLeft(150);
     motors.Stop(150);
     motors.MoveRight(150);
+    // init_pwm();
+
+    // brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0, 50);
+    // vTaskDelay(1000 / portTICK_RATE_MS);
+
+    // brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
+    // vTaskDelay(1000 / portTICK_RATE_MS);
+
+    // brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_0, 100);
+    // vTaskDelay(1000 / portTICK_RATE_MS);
+
     timer = xTimerCreate("Timer", 1, pdTRUE, (void*)0, timer_stop_callback);
     xTaskCreatePinnedToCore(motors_task, "motors_task", 4096, NULL, 5, NULL, 1);
     SetSpeed(MOTORS_SPEEDMAX);

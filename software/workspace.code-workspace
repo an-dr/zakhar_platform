@@ -38,6 +38,7 @@
 			"cstring": "cpp",
 			"random": "cpp"
 		},
+        "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
 		"autoHide.autoHidePanel": false,
 		"autoHide.autoHideSideBar": false,
 		"idf.flashType": "UART",
