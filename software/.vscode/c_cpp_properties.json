@@ -1,18 +1,16 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "ESP-IDF",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "includePath": [
-                "${config:idf.espIdfPath}/components/**",
-                "${config:idf.espIdfPathWin}/components/**",
+                "${env:IDF_PATH}/components/**",
                 "${workspaceFolder}/**"
             ],
             "browse": {
                 "path": [
-                    "${config:idf.espIdfPath}/components",
-                    "${config:idf.espIdfPathWin}/components",
+                    "${env:IDF_PATH}/components",
                     "${workspaceFolder}"
                 ],
                 "limitSymbolsToIncludedHeaders": false

@@ -34,6 +34,9 @@
 #include "serial.h"
 #include "sdkconfig.h"
 
+#include "driver/mcpwm.h"
+#include "soc/mcpwm_periph.h"
+
 static const char* TAG = "main";
 
 #define CHECK_LOAD_STAGE(func, unit_name)                    \
@@ -72,38 +75,74 @@ extern "C" void app_main()
     CHECK_LOAD_STAGE(init_indication(), "Indication");
     led_red(); // boot is started
 
+
+#if 1
+
 #if MPU_ENABLED
     /* Each MPU angle is represented as [SIGN : INT_VALUE]
        Values for Z-rotation (parallel to floor):
        [ 0 : 0...180] rotation clockwise for
        [ 1 : 0...179] rotation counter-clockwise
     */
-    CHECK_LOAD_STAGE(start_mpu(), "MPU");
+    // CHECK_LOAD_STAGE(start_mpu(), "MPU");
 #endif
 
-    CHECK_LOAD_STAGE(start_i2c_slave(), "I2C");
+    // CHECK_LOAD_STAGE(start_i2c_slave(), "I2C");
     // CHECK_LOAD_STAGE(start_motors(), "Motors");
     CHECK_LOAD_STAGE(start_serial(), "Serial control");
-    CHECK_LOAD_STAGE(start_control(), "Control system");
-    CHECK_LOAD_STAGE(start_bt_serial(), "Bluetooth");
+    // CHECK_LOAD_STAGE(start_control(), "Control system");
+    // CHECK_LOAD_STAGE(start_bt_serial(), "Bluetooth");
+
+#endif
 
 #if 1
-    motors_e32.Forward(50.0);
+    // motors_e32.Init();
+
+    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, PIN_MOTOR_L1);
+    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, PIN_MOTOR_L2);
+    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM2A, PIN_MOTOR_R1);
+    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM2B, PIN_MOTOR_R2);
+
+    mcpwm_config_t pwm_config;
+    pwm_config.frequency = 50; //Hz,
+    pwm_config.cmpr_a = 0; //duty cycle of PWMxA = 0
+    pwm_config.cmpr_b = 0; //duty cycle of PWMxb = 0
+    pwm_config.counter_mode = MCPWM_UP_COUNTER;
+    pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
+
+    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
+    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_2, &pwm_config);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    motors_e32.Stop();
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    motors_e32.Backward(10.0);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    motors_e32.Left(25.0);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, 100.0);
+    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
+    // mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
+
+    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_GEN_B);
+    // mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_GEN_A, 100.0);
+    // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
+    // right - Forward
+
+    // motors_e32.Forward(100.0);
+    // vTaskDelay(1000 / portTICK_PERIOD_MS);
+    // motors_e32.Stop();
+    // vTaskDelay(1000 / portTICK_PERIOD_MS);
+    // motors_e32.Backward(75.0);
+    // vTaskDelay(1000 / portTICK_PERIOD_MS);
+    // motors_e32.Left(60.0);
+    // vTaskDelay(1000 / portTICK_PERIOD_MS);
 #endif
+
+
+
     if (successfull_boot) {
         led_green(); // boot is done with no errors
     }
     ESP_LOGI(TAG, "Init done %s", (successfull_boot ? "successfully" : "with errors"));
 
 
-    logging_loop();
+    // logging_loop();
 
     while (1) {
         vTaskDelay(1);

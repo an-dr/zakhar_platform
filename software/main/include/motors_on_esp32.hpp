@@ -24,6 +24,7 @@ public:
     int pin_r2;
 
     MotorsOnEsp32(int pin_left_a, int pin_left_b, int pin_right_a, int pin_right_b);
+    void Init();
     void Forward(float speed_0_100);
     void Backward(float speed_0_100);
     void Left(float speed_0_100);

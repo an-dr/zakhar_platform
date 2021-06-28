@@ -43,6 +43,7 @@
 		"autoHide.autoHideSideBar": false,
 		"idf.flashType": "UART",
         "idf.portWin": "COM17",
+        "idf.gitPath": "C:\\Users\\dongr\\.espressif\\tools\\idf-git\\cmd\\git.exe",
 
 	},
     "extensions": {

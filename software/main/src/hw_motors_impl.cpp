@@ -31,7 +31,7 @@ static uint32_t go_ms = 0;
 TimerHandle_t timer;
 bool stopped = true;
 Motors_dc2platform_pnt_t action = NULL;
-Motors_dc2platform motors(PIN_MOTOR_R1, PIN_MOTOR_R2, PIN_MOTOR_L1, PIN_MOTOR_L2);
+// Motors_dc2platform motors(PIN_MOTOR_R1, PIN_MOTOR_R2, PIN_MOTOR_L1, PIN_MOTOR_L2);
 
 
 void SetAction(Motors_dc2platform_pnt_t a){

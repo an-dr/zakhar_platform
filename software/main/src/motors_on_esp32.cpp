@@ -22,19 +22,25 @@ MotorsOnEsp32::MotorsOnEsp32(int pin_left_a, int pin_left_b, int pin_right_a, in
     pin_r1 = pin_right_a;
     pin_r2 = pin_right_b;
 
+
+}
+
+void MotorsOnEsp32::Init()
+{
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, pin_r1);
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, pin_r2);
     mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0A, pin_l1);
     mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM0B, pin_l2);
 
     mcpwm_config_t pwm_config;
-    pwm_config.frequency = 1000; //frequency = 500Hz,
+    pwm_config.frequency = 25; //Hz,
     pwm_config.cmpr_a = 0; //duty cycle of PWMxA = 0
     pwm_config.cmpr_b = 0; //duty cycle of PWMxb = 0
     pwm_config.counter_mode = MCPWM_UP_COUNTER;
     pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
-    mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_1, &pwm_config);
+    mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_0, &pwm_config);
+    // mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_1, &pwm_config);
 }
 
 void MotorsOnEsp32::Stop()
