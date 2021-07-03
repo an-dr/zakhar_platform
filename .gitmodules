@@ -4,9 +4,6 @@
 [submodule "software/components/I2Cbus"]
 	path = software/components/I2Cbus
 	url = https://github.com/natanaeljr/esp32-I2Cbus.git
-[submodule "software/components/hw_motors"]
-	path = software/components/hw_motors
-	url = git@github.com:an-dr/hw_motors.git
 [submodule "software/components/ControlCallbacks"]
 	path = software/components/ControlCallbacks
 	url = git@github.com:an-dr/ControlCallbacks.git
