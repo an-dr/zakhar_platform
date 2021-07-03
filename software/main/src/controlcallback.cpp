@@ -14,7 +14,6 @@
 #include "common.h"
 #include "commands.hpp"
 #include "controlcallback.h"
-#include "hw_motors_impl.hpp"
 #include "registers.hpp"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"

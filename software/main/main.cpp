@@ -20,7 +20,6 @@
 #include "freertos/task.h"
 
 #include "common.h"
-#include "hw_motors_impl.hpp"
 #include "motors_on_esp32.hpp"
 #include "zk_i2c.h"
 #if MPU_ENABLED
@@ -96,27 +95,16 @@ extern "C" void app_main()
 #endif
 
 #if 1
-    // motors_e32.Init();
+    motors_esp32.Init();
 
-    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, PIN_MOTOR_L1);
-    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, PIN_MOTOR_L2);
-    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM2A, PIN_MOTOR_R1);
-    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM2B, PIN_MOTOR_R2);
+    // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, PIN_MOTOR_L1);
+    // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, PIN_MOTOR_L2);
+    // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM2A, PIN_MOTOR_R1);
+    // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM2B, PIN_MOTOR_R2);
 
-    mcpwm_config_t pwm_config;
-    pwm_config.frequency = 50; //Hz,
-    pwm_config.cmpr_a = 0; //duty cycle of PWMxA = 0
-    pwm_config.cmpr_b = 0; //duty cycle of PWMxb = 0
-    pwm_config.counter_mode = MCPWM_UP_COUNTER;
-    pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
 
-    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
-    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_2, &pwm_config);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_B);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, 100.0);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
+    // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
     // mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
 
     // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_GEN_B);
@@ -124,13 +112,13 @@ extern "C" void app_main()
     // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
     // right - Forward
 
-    // motors_e32.Forward(100.0);
+    // motors_esp32.Forward(100.0);
     // vTaskDelay(1000 / portTICK_PERIOD_MS);
-    // motors_e32.Stop();
+    // motors_esp32.Stop();
     // vTaskDelay(1000 / portTICK_PERIOD_MS);
-    // motors_e32.Backward(75.0);
+    // motors_esp32.Backward(75.0);
     // vTaskDelay(1000 / portTICK_PERIOD_MS);
-    // motors_e32.Left(60.0);
+    // motors_esp32.Left(60.0);
     // vTaskDelay(1000 / portTICK_PERIOD_MS);
 #endif
 

@@ -12,8 +12,12 @@
 
 #pragma once
 
-#define LEFT_SPEED_COEF 1
-#define RIGHT_SPEED_COEF 1
+#include <stdint.h>
+#include "driver/mcpwm.h"
+
+
+#define MCPWM_TIMER_LEFT MCPWM_TIMER_0
+#define MCPWM_TIMER_RIGHT MCPWM_TIMER_1
 
 
 class MotorsOnEsp32{
@@ -34,8 +38,11 @@ public:
 protected:
 
 private:
-
+    void set_left_speed(int8_t speed);
+    void set_right_speed(int8_t speed);
+    static float CalcDuty(float in_val);
+    static void SetGens(mcpwm_generator_t & gen_1, mcpwm_generator_t &gen_2, int8_t speed);
 
 };
 
-extern MotorsOnEsp32 motors_e32;
+extern MotorsOnEsp32 motors_esp32;

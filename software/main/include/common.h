@@ -84,8 +84,8 @@ enum reristers {
 
 #define PIN_MOTOR_R1 GPIO_NUM_26
 #define PIN_MOTOR_R2 GPIO_NUM_5
-#define PIN_MOTOR_L1 GPIO_NUM_23
-#define PIN_MOTOR_L2 GPIO_NUM_19
+#define PIN_MOTOR_L1 GPIO_NUM_19
+#define PIN_MOTOR_L2 GPIO_NUM_23
 
 /*********************************************************************** Pinout*/
 /* Commands

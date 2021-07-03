@@ -44,6 +44,16 @@
 		"idf.flashType": "UART",
         "idf.portWin": "COM17",
         "idf.gitPath": "C:\\Users\\dongr\\.espressif\\tools\\idf-git\\cmd\\git.exe",
+        "terminal.integrated.profiles.windows": {
+            "esp-idf@pwsh": {
+              "source": "PowerShell",
+              "args": ["-NoProfile",
+                       "-NoExit",
+                       "-c",
+                       "'. $env:IDF_PATH/export.ps1'"
+                        ]
+            }
+          },
 
 	},
     "extensions": {
