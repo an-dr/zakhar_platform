@@ -23,13 +23,12 @@
 #define RIGHT_SPEED_COEF 1
 
 MotorsOnEsp32::MotorsOnEsp32(int pin_left_a, int pin_left_b, int pin_right_a, int pin_right_b)
+    : pin_l1(pin_left_a)
+    , pin_l2(pin_left_b)
+    , pin_r1(pin_right_a)
+    , pin_r2(pin_right_b)
+
 {
-    pin_l1 = pin_left_a;
-    pin_l2 = pin_left_b;
-    pin_r1 = pin_right_a;
-    pin_r2 = pin_right_b;
-
-
 }
 
 void MotorsOnEsp32::Init()
@@ -54,84 +53,48 @@ void MotorsOnEsp32::Init()
     mcpwm_set_pin(MCPWM_UNIT_0, &pin_config);
 
     mcpwm_config_t pwm_config;
-    pwm_config.frequency = 100;    //frequency = 1000Hz
+    pwm_config.frequency = 25;    //frequency = 25Hz
     pwm_config.cmpr_a = 50;    //duty cycle of PWMxA = 50.0%
     pwm_config.cmpr_b = 50;    //duty cycle of PWMxb = 50.0%
     pwm_config.counter_mode = MCPWM_UP_COUNTER;
     pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
 
-    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, &pwm_config);    //Configure PWM0A & PWM0B with above settings
-    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, &pwm_config);    //Configure PWM1A & PWM1B with above settings
-    // mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_2, &pwm_config);    //Configure PWM2A & PWM2B with above settings
+    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, &pwm_config); 
+    mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, &pwm_config);
 
-    printf(">Left\n");
-    set_left_speed(127);
-    printf(">Right\n");
-    set_right_speed(127);
-
-    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_B);
-    // mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A, 20); 
-
-    // // mcpwm_set_frequency(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT,50);
-    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_B);
-    // mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A, 10.0); 
+    set_left_speed(0);
+    set_right_speed(0);
 }
 
 void MotorsOnEsp32::Stop()
 {
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A);
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_B);
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A);
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_B);
+    set_left_speed(0);
+    set_right_speed(0);
 }
 
-void MotorsOnEsp32::Forward(float speed_0_100)
-{
-    // left - Forward
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_B);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A, speed_0_100*LEFT_SPEED_COEF);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
-    // right - Forward
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_B);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A, speed_0_100*RIGHT_SPEED_COEF);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
+void MotorsOnEsp32::Forward(uint8_t speed)
+{   
+    set_left_speed(speed/2);
+    set_right_speed(speed/2);
 }
 
 
-void MotorsOnEsp32::Backward(float speed_0_100)
+void MotorsOnEsp32::Backward(uint8_t speed)
 {
-    // left - Backward
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_B, speed_0_100*LEFT_SPEED_COEF);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
-    // right - Backward
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_B, speed_0_100*RIGHT_SPEED_COEF);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
+    set_left_speed(-speed/2);
+    set_right_speed(-speed/2);
 }
 
-void MotorsOnEsp32::Left(float speed_0_100)
+void MotorsOnEsp32::Left(uint8_t speed)
 {
-    // left - Backward
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_B, speed_0_100*LEFT_SPEED_COEF);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
-    // right - Forward
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_B);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A, speed_0_100*RIGHT_SPEED_COEF);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
+    set_left_speed(-speed/2);
+    set_right_speed(speed/2);
 }
 
-void MotorsOnEsp32::Right(float speed_0_100)
+void MotorsOnEsp32::Right(uint8_t speed)
 {
-    // left - Forward
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_B);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A, speed_0_100*LEFT_SPEED_COEF);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
-    // right - Backward
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_B, speed_0_100*RIGHT_SPEED_COEF);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, MCPWM_GEN_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
+    set_left_speed(speed/2);
+    set_right_speed(-speed/2);
 }
 
 float MotorsOnEsp32::CalcDuty(float speed){
@@ -158,23 +121,56 @@ void MotorsOnEsp32::SetGens(mcpwm_generator_t & gen_1, mcpwm_generator_t &gen_2,
     }
 }
 
+float MotorsOnEsp32::CalcSpeed(float speed, float k)
+{
+    if (speed == 0) {
+        return 0;
+    }
+    bool sign = (speed >= 0) ? true : false;
+    float speed_val = abs(speed) * k;
+    bool too_low = (speed_val < MIN_SPEED) ? true : false;
+    if (too_low) {
+        return MIN_SPEED;
+    } else {
+        return sign ? speed_val : -speed_val;
+    }
+}
+
 void MotorsOnEsp32::set_left_speed(int8_t speed){
     mcpwm_generator_t gen1, gen2;
     SetGens(gen1, gen2, speed);
-    float duty_l = CalcDuty(speed*LEFT_SPEED_COEF);
-    printf("Set left. gen_%d to 0, gen_%d to %f\n", gen1, gen2, duty_l);
+    float speed_calc = CalcSpeed(speed, LEFT_SPEED_COEF);
+    float duty = CalcDuty(speed_calc);
+    printf("Motor left. gen_%d to 0, gen_%d to %f\n", gen1, gen2, duty);
     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, gen1);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, gen2, duty_l);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_LEFT, gen2, duty);
 }
 
 void MotorsOnEsp32::set_right_speed(int8_t speed){
     mcpwm_generator_t gen1, gen2;
     SetGens(gen1, gen2, speed);
-    float duty_r = CalcDuty(speed*RIGHT_SPEED_COEF);
-    printf("Set right. gen_%d to 0, gen_%d to %f\n", gen1, gen2, duty_r);
+    float speed_calc = CalcSpeed(speed, RIGHT_SPEED_COEF);
+    float duty = CalcDuty(speed_calc);
+    printf("Motor right. gen_%d to 0, gen_%d to %f\n", gen1, gen2, duty);
     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, gen1);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, gen2, duty_r);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_RIGHT, gen2, duty);
 }
 
 
 MotorsOnEsp32 motors_esp32(PIN_MOTOR_L1, PIN_MOTOR_L2, PIN_MOTOR_R1, PIN_MOTOR_R2);
+
+
+esp_err_t start_motors(void)
+{
+    motors_esp32.Init();
+
+    motors_esp32.Forward(250);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    printf("------\n");
+    motors_esp32.Left(250);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    printf("------\n");
+    motors_esp32.Right(250);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    return ESP_OK;
+}

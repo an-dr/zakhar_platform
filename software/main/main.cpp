@@ -87,15 +87,15 @@ extern "C" void app_main()
 #endif
 
     // CHECK_LOAD_STAGE(start_i2c_slave(), "I2C");
-    // CHECK_LOAD_STAGE(start_motors(), "Motors");
-    CHECK_LOAD_STAGE(start_serial(), "Serial control");
+    CHECK_LOAD_STAGE(start_motors(), "Motors");
+    // CHECK_LOAD_STAGE(start_serial(), "Serial control");
     // CHECK_LOAD_STAGE(start_control(), "Control system");
     // CHECK_LOAD_STAGE(start_bt_serial(), "Bluetooth");
 
 #endif
 
 #if 1
-    motors_esp32.Init();
+    ;
 
     // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, PIN_MOTOR_L1);
     // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, PIN_MOTOR_L2);

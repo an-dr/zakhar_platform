@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include "driver/mcpwm.h"
+#include "esp_err.h"
 
 
 #define MCPWM_TIMER_LEFT MCPWM_TIMER_0
@@ -29,10 +30,10 @@ public:
 
     MotorsOnEsp32(int pin_left_a, int pin_left_b, int pin_right_a, int pin_right_b);
     void Init();
-    void Forward(float speed_0_100);
-    void Backward(float speed_0_100);
-    void Left(float speed_0_100);
-    void Right(float speed_0_100);
+    void Forward(uint8_t speed);
+    void Backward(uint8_t speed);
+    void Left(uint8_t speed);
+    void Right(uint8_t speed);
     void Stop();
 
 protected:
@@ -41,8 +42,10 @@ private:
     void set_left_speed(int8_t speed);
     void set_right_speed(int8_t speed);
     static float CalcDuty(float in_val);
+    static float CalcSpeed(float speed, float k);
     static void SetGens(mcpwm_generator_t & gen_1, mcpwm_generator_t &gen_2, int8_t speed);
 
 };
 
 extern MotorsOnEsp32 motors_esp32;
+esp_err_t start_motors(void);

@@ -12,6 +12,9 @@
 
 #pragma once
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 /* Peripherals and sw configs
    ********************************************************************* */
 
@@ -51,6 +54,8 @@
 
 
 #define ESTR(x) (esp_err_to_name(x))
+
+#define DELAY_MS(x) (vTaskDelay(x/portTICK_PERIOD_MS))
 
 /*********************************************************************** Macros*/
 /* Registers
