@@ -12,6 +12,9 @@
 
 #pragma once
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 /* Peripherals and sw configs
    ********************************************************************* */
 
@@ -52,6 +55,8 @@
 
 #define ESTR(x) (esp_err_to_name(x))
 
+#define DELAY_FREERTOS(ms) (vTaskDelay(ms/portTICK_PERIOD_MS))
+
 /*********************************************************************** Macros*/
 /* Registers
    ********************************************************************* */
@@ -84,8 +89,8 @@ enum reristers {
 
 #define PIN_MOTOR_R1 GPIO_NUM_26
 #define PIN_MOTOR_R2 GPIO_NUM_5
-#define PIN_MOTOR_L1 GPIO_NUM_23
-#define PIN_MOTOR_L2 GPIO_NUM_19
+#define PIN_MOTOR_L1 GPIO_NUM_19
+#define PIN_MOTOR_L2 GPIO_NUM_23
 
 /*********************************************************************** Pinout*/
 /* Commands

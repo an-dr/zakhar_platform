@@ -10,8 +10,8 @@
 set(srcs
             "main.cpp"
             "src/bluetooth_serial.cpp"
-            "src/commands.cpp"
-            "src/hw_motors_impl.cpp"
+            "src/motor_controller.cpp"
+            "src/motors_on_esp32.cpp"
             "src/indication.cpp"
             "src/position_unit.cpp"
             "src/controlcallback.cpp"
