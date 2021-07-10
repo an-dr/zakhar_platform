@@ -55,7 +55,7 @@
 
 #define ESTR(x) (esp_err_to_name(x))
 
-#define DELAY_MS(x) (vTaskDelay(x/portTICK_PERIOD_MS))
+#define DELAY_FREERTOS(ms) (vTaskDelay(ms/portTICK_PERIOD_MS))
 
 /*********************************************************************** Macros*/
 /* Registers

@@ -60,7 +60,8 @@
 	},
     "extensions": {
         "recommendations": [
-            "espressif.esp-idf-extension"
+            "espressif.esp-idf-extension",
+            "github.vscode-pull-request-github"
         ],
     }
 }

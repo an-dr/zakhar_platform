@@ -30,17 +30,17 @@ public:
 
     MotorsOnEsp32(int pin_left_a, int pin_left_b, int pin_right_a, int pin_right_b);
     void Init();
-    void Forward(uint8_t speed);
-    void Backward(uint8_t speed);
-    void Left(uint8_t speed);
-    void Right(uint8_t speed);
-    void Stop();
+    void Forward(uint8_t speed, uint32_t delay_ms = 0);
+    void Backward(uint8_t speed, uint32_t delay_ms = 0);
+    void Left(uint8_t speed, uint32_t delay_ms = 0);
+    void Right(uint8_t speed, uint32_t delay_ms = 0);
+    void Stop(uint32_t delay_ms = 0);
+    void set_left_speed(int8_t speed);
+    void set_right_speed(int8_t speed);
 
 protected:
 
 private:
-    void set_left_speed(int8_t speed);
-    void set_right_speed(int8_t speed);
     static float CalcDuty(float in_val);
     static float CalcSpeed(float speed, float k);
     static void SetGens(mcpwm_generator_t & gen_1, mcpwm_generator_t &gen_2, int8_t speed);
